@@ -1,0 +1,183 @@
+import { useState } from "react";
+import classes from "./compose.module.css";
+import { uploadImage } from "utils";
+import { graphQlService } from "services";
+import { useLocation, useNavigate } from "react-router-dom";
+import { POSTS_ROUTE } from "constants";
+
+const Compose = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+  const editedPost = location.state?.editedPost || null;
+  const [formValue, setFormValue] = useState({
+    title: editedPost?.title || "",
+    content: editedPost?.content || "",
+  });
+  const [file, setFile] = useState(null);
+  const navigate = useNavigate();
+
+  const handleChangeValue = (e) => {
+    const { value, name } = e.target;
+
+    setFormValue((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    let errors = [];
+
+    if (!formValue.title || formValue.title.length === 0) {
+      errors.push("Title is required.");
+    }
+    if (!formValue.content || formValue.content.length === 0) {
+      errors.push("Content is required.");
+    }
+
+    if ((!file || file?.size === 0) && !editedPost) {
+      errors.push("Image is required.");
+    }
+
+    if (errors.length > 0) {
+      return { errors };
+    }
+
+    let imageUrl;
+
+    setIsLoading(true);
+
+    if (file) {
+      try {
+        imageUrl = await uploadImage(file);
+      } catch (error) {
+        setIsLoading(false);
+        throw new Error(
+          "Image upload failed, post was not created. Please try again later."
+        );
+      }
+    }
+
+    const newPost = {
+      ...formValue,
+      imageUrl: imageUrl || editedPost?.imageUrl,
+    };
+
+    if (editedPost) {
+      updatePost(newPost);
+    } else {
+      createPost(newPost);
+    }
+  };
+
+  async function createPost(post) {
+    const graphqlQuery = {
+      query: `
+      mutation{
+      createPost(postInput: {title: "${post.title}", content:"${post.content}", imageUrl: "${post.imageUrl}"}){
+        _id
+        title
+        content
+        imageUrl
+        createdAt
+        updatedAt
+       }
+      }
+      `,
+    };
+
+    try {
+      await graphQlService.post(graphqlQuery);
+      navigate(POSTS_ROUTE);
+    } catch (error) {
+      throw new Error("Post was not created. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function updatePost(post) {
+    const graphqlQuery = {
+      query: `
+      mutation{
+      updatePost(id: "${editedPost._id}", postInput: {title: "${post.title}", content:"${post.content}", imageUrl: "${post.imageUrl}"}){
+        _id
+        title
+        content
+        imageUrl
+        createdAt
+        updatedAt
+       }
+      }
+      `,
+    };
+
+    try {
+      await graphQlService.post(graphqlQuery);
+      navigate(POSTS_ROUTE);
+    } catch (error) {
+      throw new Error("Post was not updated. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <main className={classes.compose}>
+      <section className={classes.composeWrapper}>
+        {(file || editedPost) && (
+          <img
+            className={classes.writeImg}
+            src={file ? URL.createObjectURL(file) : editedPost?.imageUrl}
+            alt="this is post cover"
+          />
+        )}
+        <form className={classes.form} onSubmit={handleSubmit}>
+          <p>
+            <label htmlFor="imageUrl">
+              <span className={classes.writeFormIcon}>+</span>
+            </label>
+            <input
+              type={"file"}
+              id="imageUrl"
+              style={{ display: "none" }}
+              onChange={(event) => setFile(event.target.files[0])}
+            />
+          </p>
+          <p>
+            <label htmlFor="title">Title</label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              required
+              value={formValue.title}
+              onChange={handleChangeValue}
+            />
+          </p>
+          <p>
+            <label htmlFor="content">Content</label>
+            <textarea
+              id="content"
+              name="content"
+              rows="10"
+              required
+              value={formValue.content}
+              onChange={handleChangeValue}
+            ></textarea>
+          </p>
+          <button
+            className={classes.writeSubmit}
+            type="submit"
+            disabled={isLoading}
+          >
+            {isLoading ? "Publishing..." : "Publish"}
+          </button>
+        </form>
+      </section>
+    </main>
+  );
+};
+
+export default Compose;

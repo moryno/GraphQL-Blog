@@ -1,0 +1,67 @@
+
+.nav {
+    width: 100%;
+    background-image: linear-gradient(
+            135deg,
+            rgb(24, 42, 115) 0%,
+            rgb(33, 138, 174) 69%,
+            rgb(32, 167, 172) 89%
+    ) !important;
+    color: rgb(211, 216, 232);
+    padding: 10px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 9;
+  }
+.nav section{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 70%;
+  margin: auto;
+}
+  .nav article{
+    display: flex;
+    align-items: center;
+    gap: 1.25em;
+  }
+  .nav div{
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+
+  }
+
+  .navLink {
+  }
+  .navLink button {
+    color: white;
+    background-color: #12CC1B;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 7px 10px;
+    font-size: 1em;
+  }
+
+  .navLink > div{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .navLink > div > h1, span{
+    font-size: 1.125em;
+    font-weight: 500;
+  }
+  .navLink > div > img{
+    width: 30px;
+  }
+
+  .navProfile{
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    border-radius: 50%;
+    cursor: pointer;
+  }

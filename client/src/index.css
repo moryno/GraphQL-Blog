@@ -1,0 +1,24 @@
+*{
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+  color: inherit;
+  box-sizing: border-box;
+}
+
+
+:root {
+  --foreground-rgb: rgb(211, 216, 232);
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide{
+  scrollbar-width: none;
+}
