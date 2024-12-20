@@ -6,11 +6,11 @@ const requestService = axios.create({ baseURL: BASE_URL });
 
 requestService.interceptors.request.use(
   (config) => {
-    const TOKEN = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || null);
 
-    if (TOKEN) {
+    if (user) {
       config.headers = {
-        Authorization: `Bearer ${TOKEN}`,
+        Authorization: `Bearer ${user.token}`,
       };
     }
 

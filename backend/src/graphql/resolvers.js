@@ -113,6 +113,12 @@ export default {
     { postInput: { title, content, imageUrl } },
     req
   ) {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated!");
+      error.code = 401;
+      throw error;
+    }
+
     const errors = [];
     if (validator.isEmpty(title) || !validator.isLength(title, { min: 3 })) {
       errors.push({ title: "Title is invalid." });
@@ -135,6 +141,13 @@ export default {
     }
 
     try {
+      const user = await User.findById(req.userId);
+      if (!user) {
+        const error = new Error("User not found.");
+        error.code = 404;
+        throw error;
+      }
+
       const postExist = await Post.findOne({ title });
 
       if (postExist) {
@@ -146,13 +159,11 @@ export default {
         title,
         content,
         imageUrl,
-        author: {
-          _id: "6732f59ecbe6686ccc9891b6",
-        },
+        author: user,
       });
       const createdPost = await post.save();
-      // TO DO
-      // Add post to users post
+      user.posts.push(post);
+      await user.save();
 
       return {
         ...createdPost._doc,
@@ -167,8 +178,11 @@ export default {
   },
   posts: async function (args, req) {
     try {
-      // TO DO
-      // Check if user is authenticated
+      if (!req.isAuth) {
+        const error = new Error("Not authenticated!");
+        error.code = 401;
+        throw error;
+      }
 
       const posts = await Post.find()
         .sort({ createdAt: -1 })
@@ -184,8 +198,11 @@ export default {
   },
   post: async function ({ id }, req) {
     try {
-      // TO DO
-      // Check if user is authenticated
+      if (!req.isAuth) {
+        const error = new Error("Not authenticated!");
+        error.code = 401;
+        throw error;
+      }
 
       const post = await Post.findById(id).populate("author");
 
@@ -205,7 +222,12 @@ export default {
   },
   deletePost: async function ({ id }, req) {
     try {
-      // Check if user is authenticated
+      if (!req.isAuth) {
+        const error = new Error("Not authenticated!");
+        error.code = 401;
+        throw error;
+      }
+
       const post = await Post.findById(id);
       if (!post) {
         const error = new Error("Post not found");
@@ -221,6 +243,12 @@ export default {
     { id, postInput: { title, content, imageUrl } },
     req
   ) {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated!");
+      error.code = 401;
+      throw error;
+    }
+
     const errors = [];
     if (validator.isEmpty(title) || !validator.isLength(title, { min: 3 })) {
       errors.push({ title: "Title is invalid." });
