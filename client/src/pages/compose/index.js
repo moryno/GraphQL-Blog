@@ -14,6 +14,11 @@ const Compose = () => {
     content: editedPost?.content || "",
   });
   const [file, setFile] = useState(null);
+  const [errors, setErrors] = useState({
+    title: null,
+    content: null,
+    imageUrl: null,
+  });
   const navigate = useNavigate();
 
   const handleChangeValue = (e) => {
@@ -91,6 +96,17 @@ const Compose = () => {
       await graphQlService.post(graphqlQuery);
       navigate(POSTS_ROUTE);
     } catch (error) {
+      if (error.response.data.errors[0].status === 422) {
+        const errorMsg = error.response.data.errors[0].data;
+
+        setErrors({
+          title: errorMsg[0]?.title || null,
+          content: errorMsg[1]?.content || null,
+          imageUrl: errorMsg[2]?.imageUrl || null,
+        });
+        return;
+      }
+      console.log(error);
       throw new Error("Post was not created. Please try again later.");
     } finally {
       setIsLoading(false);
@@ -117,7 +133,18 @@ const Compose = () => {
       await graphQlService.post(graphqlQuery);
       navigate(POSTS_ROUTE);
     } catch (error) {
-      throw new Error("Post was not updated. Please try again later.");
+      if (error.response.data.errors[0].status === 422) {
+        const errorMsg = error.response.data.errors[0].data;
+
+        setErrors({
+          title: errorMsg[0]?.title || null,
+          content: errorMsg[1]?.content || null,
+          imageUrl: errorMsg[2]?.imageUrl || null,
+        });
+        return;
+      }
+      console.log(error);
+      throw new Error("Post was not created. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -134,7 +161,7 @@ const Compose = () => {
           />
         )}
         <form className={classes.form} onSubmit={handleSubmit}>
-          <p>
+          <div>
             <label htmlFor="imageUrl">
               <span className={classes.writeFormIcon}>+</span>
             </label>
@@ -144,8 +171,11 @@ const Compose = () => {
               style={{ display: "none" }}
               onChange={(event) => setFile(event.target.files[0])}
             />
-          </p>
-          <p>
+            {errors && errors?.imageUrl && (
+              <p className={classes.error}>{errors?.imageUrl}</p>
+            )}
+          </div>
+          <div>
             <label htmlFor="title">Title</label>
             <input
               type="text"
@@ -155,8 +185,11 @@ const Compose = () => {
               value={formValue.title}
               onChange={handleChangeValue}
             />
-          </p>
-          <p>
+            {errors && errors?.title && (
+              <p className={classes.error}>{errors?.title}</p>
+            )}
+          </div>
+          <div>
             <label htmlFor="content">Content</label>
             <textarea
               id="content"
@@ -166,7 +199,10 @@ const Compose = () => {
               value={formValue.content}
               onChange={handleChangeValue}
             ></textarea>
-          </p>
+            {errors && errors?.content && (
+              <p className={classes.error}>{errors?.content}</p>
+            )}
+          </div>
           <button
             className={classes.writeSubmit}
             type="submit"

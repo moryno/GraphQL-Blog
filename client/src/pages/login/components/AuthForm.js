@@ -13,6 +13,7 @@ const AuthForm = ({ isRegisterRoute }) => {
     email: "",
     password: "",
   });
+  const [errors, setErrors] = useState(null);
   const { onLogin } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -71,7 +72,12 @@ const AuthForm = ({ isRegisterRoute }) => {
         navigate(LANDING_PAGE_ROUTE);
       }
     } catch (error) {
+      if (error.response.data.errors[0].status === 422) {
+        setErrors(error.response.data.errors[0].data);
+        return;
+      }
       console.log(error);
+      setErrors([{ message: "User creation failed." }]);
     } finally {
       setIsLoading(false);
     }
@@ -114,6 +120,12 @@ const AuthForm = ({ isRegisterRoute }) => {
         placeholder="Enter password..."
         autoComplete="new-password"
       />
+      {errors &&
+        errors.map((err, i) => (
+          <p key={i} className={classes.error}>
+            {err.message}
+          </p>
+        ))}
       <button className={classes.authButton} disabled={isLoading}>
         {isRegisterRoute ? "Sign Up" : "Sign In"}
       </button>

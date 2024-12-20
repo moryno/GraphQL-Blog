@@ -89,3 +89,8 @@
             rgb(32, 167, 172) 89%
     ) !important;
   }
+  .error{
+    font-size: 12px;
+    color: crimson;
+    margin: 10px 0;
+}
