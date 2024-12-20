@@ -79,8 +79,8 @@ const Compose = () => {
   async function createPost(post) {
     const graphqlQuery = {
       query: `
-      mutation{
-      createPost(postInput: {title: "${post.title}", content:"${post.content}", imageUrl: "${post.imageUrl}"}){
+      mutation CreateNewPost($title: String!, $content: String!, $imageUrl: String!){
+      createPost(postInput: { title: $title, content: $content, imageUrl: $imageUrl }){
         _id
         title
         content
@@ -90,6 +90,11 @@ const Compose = () => {
        }
       }
       `,
+      variables: {
+        title: post.title,
+        content: post.content,
+        imageUrl: post.imageUrl,
+      },
     };
 
     try {
@@ -116,8 +121,8 @@ const Compose = () => {
   async function updatePost(post) {
     const graphqlQuery = {
       query: `
-      mutation{
-      updatePost(id: "${editedPost._id}", postInput: {title: "${post.title}", content:"${post.content}", imageUrl: "${post.imageUrl}"}){
+      mutation UpdateExistingPost($id: ID!, $title: String!, $content: String!, $imageUrl: String!){
+      updatePost(id: $id, postInput: { title: $title, content: $content, imageUrl: $imageUrl }){
         _id
         title
         content
@@ -127,6 +132,12 @@ const Compose = () => {
        }
       }
       `,
+      variables: {
+        id: editedPost._id,
+        title: post.title,
+        content: post.content,
+        imageUrl: post.imageUrl,
+      },
     };
 
     try {

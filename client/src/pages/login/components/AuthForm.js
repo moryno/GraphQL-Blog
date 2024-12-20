@@ -36,26 +36,35 @@ const AuthForm = ({ isRegisterRoute }) => {
       if (isRegisterRoute) {
         graphqlQuery = {
           query: `
-          mutation {
-              register(userInput: {email: "${formValue.email}", name: "${formValue.name}", password: "${formValue.password}"}){
+          mutation CreateUser($email: String!, $name: String!, $password: String!){
+              register(userInput: { email: $email, name: $name, password: $password }){
                 _id
                 name
                 email
               }
             }
           `,
+          variables: {
+            email: formValue.email,
+            name: formValue.name,
+            password: formValue.password,
+          },
         };
       } else {
         graphqlQuery = {
           query: `
-          query {
-            login(email: "${formValue.email}", password: "${formValue.password}"){
+          query SignIn($email: String!, $password: String!){
+            login(email: $email, password: $password){
             userId
             token, 
             name
             }
             }
           `,
+          variables: {
+            email: formValue.email,
+            password: formValue.password,
+          },
         };
       }
 

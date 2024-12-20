@@ -17,8 +17,8 @@ const PostDetails = () => {
   const getSinglePost = useCallback(async (id) => {
     const graphqlQuery = {
       query: `
-        query{
-          post(id: "${id}"){
+        query GetPostByID($id: ID!){
+          post(id: $id){
             _id
             title
             content
@@ -30,6 +30,9 @@ const PostDetails = () => {
           }
         }
       `,
+      variables: {
+        id,
+      },
     };
 
     try {
